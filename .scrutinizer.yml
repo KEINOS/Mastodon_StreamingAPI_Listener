@@ -3,5 +3,16 @@ build:
     analysis:
       tests:
         override:
-          - php-scrutinizer-run --sub-project-dir=src/
+          - php-scrutinizer-run
           - phpcs-run --standard=.phpcs.xml
+
+filter:
+  excluded_paths:
+    - ".devcontainer/*"
+    - ".init/*"
+    - ".testcontainer/*"
+    - ".vscode/*"
+    - "bench/*"
+    - "bin/*"
+    - "tests/*"
+    - "vendor/*"
