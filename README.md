@@ -26,13 +26,15 @@ use KEINOS\MSTDN_TOOLS\Listener\Listener;
 
 $conf = [
     'url_host' => 'https://qiitadon.com/',
+    // If the server is in "whitelist-mode" then you'll need an access token.
+    //'access_token' => 'YOUR_ACCESS_TOKEN',
 ];
 
 $listener = new Listener($conf);
 
 /**
  * $listener ............ Iterator.
- *   $event_name ........ Event name. ("update" and "delete")
+ *   $event_name ........ Event name. ("update" or "delete")
  *   $data_payload ...... Data of the event in JSON string.
  * @throws \Exception ... On any error occurred while listening.
  */

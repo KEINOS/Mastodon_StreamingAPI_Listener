@@ -15,15 +15,14 @@ use KEINOS\MSTDN_TOOLS\Listener\Listener;
 
 $conf = [
     'url_host' => 'https://qiitadon.com/',
-    'flag_mode_debug' => false,
+    'flag_mode_debug' => false, // false is the default
 ];
 
 $hello = new Listener($conf);
 
 $option_json_encode = JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
 foreach($hello as $key => $value) {
-    echo "${key}\t"
-    . json_encode(json_decode($value), $option_json_encode) . PHP_EOL;
+    echo "${key}\t" . json_encode(json_decode($value), $option_json_encode) . PHP_EOL;
     if($key === "delete"){
         exit();
     }

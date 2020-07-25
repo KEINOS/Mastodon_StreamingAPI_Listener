@@ -23,6 +23,7 @@ interface ListenerInterface
      * messages then opens the socket to the server.
      *
      * @param  array<string,mixed> $conf
+     * @throws \Exception
      */
     public function __construct(array $conf);
 

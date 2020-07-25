@@ -442,10 +442,14 @@ function runPHPUnit() {
     }
     setOptionPHPUnitTestdox
     echo '- Running PHPUnit'
+    # tee the result to avoid 255 status error even all tests were passed in PHP 7.1 bug.
     ./vendor/bin/phpunit \
         --configuration ./tests/conf/phpunit.xml \
-        $option_testdox
-    [ $? -eq 0 ] && return 0 || return 1
+        $option_testdox | (tee /dev/fd/3 | tail -3 | grep OK) 3>&1
+    result_phpunit=$?
+    echo 'Status:' $result_phpunit
+
+    [ $result_phpunit -eq 0 ] && return 0 || return 1
 }
 
 function runPsalm() {

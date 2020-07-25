@@ -10,14 +10,12 @@
  *   - See: https://github.com/KEINOS/Mastodon_StreamingAPI_Listener/
  */
 
- declare(strict_types=1);
+declare(strict_types=1);
 
 namespace KEINOS\MSTDN_TOOLS\Listener;
 
 use KEINOS\MSTDN_TOOLS\Config\Config;
 use KEINOS\MSTDN_TOOLS\Parser\Parser;
-
-// Parser
 
 /**
  * @phpstan-implements \Iterator<string,mixed>
@@ -47,69 +45,56 @@ class Listener extends ListenerProtectedMethods implements \Iterator, ListenerIn
             $flag_mode_debug = (false !== $conf['flag_mode_debug']);
         }
         $this->setModeAsDebug($flag_mode_debug);
-        $this->echoOnDebug('Method:' . __METHOD__ . ' was called.');
 
         $this->setNameEvent('');
         $this->setDataPayload('');
 
         $this->conf   = new Config($conf);
         $this->parser = new Parser();
-        $this->socket = $this->openSocket($this->conf);
+        $fp = $this->openSocket($this->conf);
+        if (! is_resource($fp)) {
+            $msg = 'Failed to open socket. ' . PHP_EOL;
+            throw new \Exception($msg);
+        }
+        $this->socket = $fp;
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function __destruct()
     {
-        $this->echoOnDebug('Method:' . __METHOD__ . ' was called.');
-
-        if (isset($this->socket)) {
-            if (! fclose($this->socket)) {
-                exit(1);
-            }
-        }
+        $this->closeSocket($this->socket);
     }
 
     public function current(): string
     {
-        $this->echoOnDebug('Method:' . __METHOD__ . ' was called.');
+        $read  = $this->getEventAsJson($this->socket, $this->parser);
+        $event = json_decode($read, self::ASSOC_AS_ARRAY);
 
-        $read = false;
-        while ($read === false) {
-            $line = fgets($this->socket);
-            $read = $this->parser->parse(strval($line));
+        if (! isset($event['event'])) {
+            return '';
         }
-
-        if (is_string($read)) {
-            $event = json_decode($read, self::ASSOC_AS_ARRAY);
-
-            if (! isset($event['event'])) {
-                return '';
-            }
-            if (! isset($event['payload'])) {
-                return '';
-            }
-            $event_name    = strval($event['event']);
-            $event_payload = json_encode((array) $event['payload']) ?: '';
-
-            // Set event name as a iteration key and event data(payload) as a value.
-            $this->setNameEvent($event_name);
-            $this->setDataPayload($event_payload);
-
-            return $this->getDataPayload();
+        if (! isset($event['payload'])) {
+            return '';
         }
+        $event_name    = strval($event['event']);
+        $event_payload = json_encode((array) $event['payload']) ?: '';
 
-        return '';
+        // Set event name as a iteration key and event data(payload) as a value.
+        $this->setNameEvent($event_name);
+        $this->setDataPayload($event_payload);
+
+        return $this->getDataPayload();
     }
 
     public function key(): string
     {
-        $this->echoOnDebug('Method:' . __METHOD__ . ' was called.');
-
         return $this->getNameEvent();
     }
 
     public function rewind(): void
     {
-        $this->echoOnDebug('Method:' . __METHOD__ . ' was called.');
         // Prepare request header
         $req = $this->generateRequestApiStreamingPublic($this->conf);
 
@@ -119,16 +104,16 @@ class Listener extends ListenerProtectedMethods implements \Iterator, ListenerIn
 
     public function next(): void
     {
-        $this->echoOnDebug('Method:' . __METHOD__ . ' was called.');
-
         $this->setNameEvent('');
         $this->setDataPayload('');
     }
 
     public function valid(): bool
     {
-        $this->echoOnDebug('Method:' . __METHOD__ . ' was called.');
+        if ((! feof($this->socket)) && ("resource" === gettype($this->socket))) {
+            return true;
+        }
 
-        return (! feof($this->socket));
+        return false;
     }
 }

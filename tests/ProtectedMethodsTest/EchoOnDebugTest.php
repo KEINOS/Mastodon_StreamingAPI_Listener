@@ -20,9 +20,7 @@ final class EchoOnDebugTest extends TestCase
         $method_protected->setAccessible(true);
         $dummy = hash('md5', strval(mt_rand()));
 
-        $expect = 'Method:KEINOS\MSTDN_TOOLS\Listener\Listener::__construct was called.'
-                . PHP_EOL
-                . $dummy . PHP_EOL;
+        $expect = $dummy . PHP_EOL;
         $this->expectOutputString($expect);
         $method_protected->invokeArgs($listener, [$dummy]);
     }

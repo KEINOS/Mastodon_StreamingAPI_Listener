@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace KEINOS\MSTDN_TOOLS\Listener;
 
 use KEINOS\MSTDN_TOOLS\Config\Config;
+use KEINOS\MSTDN_TOOLS\Parser\Parser;
 
 class ListenerProtectedMethods
 {
@@ -19,6 +20,15 @@ class ListenerProtectedMethods
 
     protected const NAME_USERAGENT_DEFAULT  = 'MSTDN_TOOLS/1.0 mastodon-streaming-api-listener';
     protected const CRLF = "\r\n";
+
+    /**
+     * @param  resource $socket
+     * @return void
+     */
+    protected function closeSocket($socket): void
+    {
+        fclose($socket);
+    }
 
     /**
      * @param  string $name_method
@@ -63,40 +73,64 @@ class ListenerProtectedMethods
     }
 
     /**
+     * Read/buffer lines of chunked event as one.
+     *
+     * @param  resource $socket
+     * @param  Parser   $parser
+     * @return string Event data in JSON format.
+     */
+    protected function getEventAsJson($socket, $parser): string
+    {
+        $read = false;
+        while ($read === false) {
+            $line = strval(fgets($socket));
+            $read = $parser->parse($line);
+        }
+
+        return strval($read);
+    }
+
+    /**
      * @param  Config $conf
-     * @return resource
+     * @return false|resource
      * @throws \Exception
      */
     protected function openSocket(Config $conf)
     {
-        $uri_websocket = $conf->getUriStreamingApi();
-        $host = parse_url($uri_websocket, \PHP_URL_HOST) ?: '';
-        $port = parse_url($uri_websocket, \PHP_URL_PORT) ?: 443;
-        if (! empty($host)) {
+        try {
+            $uri_websocket = $conf->getUriStreamingApi();
+
+            $host = parse_url($uri_websocket, \PHP_URL_HOST) ?: '';
+            $port = parse_url($uri_websocket, \PHP_URL_PORT) ?: 443;
+
             $hostname = 'ssl://' . $host;
-            $timeout  = 10; // seconds
-            $errno    = '';
+            $errno    = 0;
             $errstr   = '';
+            $timeout  = 10; // seconds
 
-            $fp = fsockopen($hostname, $port, $errno, $errstr, $timeout);
-            if (! $fp) {
-                $msg = "Failed to open socket. Error message: {$errstr} ({$errno})";
-                throw new \Exception($msg);
-            }
-
-            return $fp;
+            return fsockopen($hostname, intval($port), $errno, $errstr, $timeout);
+        } catch (\Exception $e) {
+            $msg = 'Failed to open socket. ' . PHP_EOL
+                 . ' - Error message: {$errstr} ({$errno})' . PHP_EOL
+                 . ' - ' . trim($e->getMessage()) . PHP_EOL;
+            throw new \Exception($msg);
         }
-
-        throw new \Exception();
     }
 
+    /**
+     * This will treat warnings as ErrorException. Note that this WILL NOT take effect
+     * if the error reporting level is 0(zero).
+     *
+     * @return void
+     */
     protected function treatWarningAsException(): void
     {
-        set_error_handler(function (int $errno, string $errstr, string $errfile, int $errline, array $errcontext) {
+        set_error_handler(function (int $errno, string $errstr, string $errfile, int $errline) {
             if (0 === error_reporting()) {
-                return false;
+                return false; // Return false to do nothing.
             }
 
+            // Error handler throws \ErrorException even warnings.
             throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
         });
     }
