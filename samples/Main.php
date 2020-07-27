@@ -16,6 +16,7 @@ use KEINOS\MSTDN_TOOLS\Listener\Listener;
 $conf = [
     'url_host' => 'https://qiitadon.com/',
     'flag_mode_debug' => false, // false is the default
+    'type_stream' => 'local',   // 'public' is the default
 ];
 
 $hello = new Listener($conf);

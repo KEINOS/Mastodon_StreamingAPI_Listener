@@ -18,7 +18,54 @@ composer require keinos/mastodon-streaming-api-listener
 ```php
 <?php
 
-namespace KEINOS\Sample;
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$conf = [
+    // Your Mastodon server URL
+    'url_host' => 'https://qiitadon.com/',
+];
+
+$listener = new \KEINOS\MSTDN_TOOLS\Listener\Listener($conf);
+
+/**
+ * $listener ............ The iterator.
+ *   $event_name ........ Event name. ("update" or "delete")
+ *   $data_payload ...... Data of the event in JSON string.
+ */
+foreach($listener as $event_name => $data_payload) {
+    echo 'Event name: ' . $event_name . PHP_EOL;
+    echo 'Data: '. PHP_EOL;
+    print_r(json_decode($data_payload));
+}
+
+```
+
+```php
+<?php
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+// Alias \KEINOS\MSTDN_TOOLS\Listener\Listener as Listener
+use KEINOS\MSTDN_TOOLS\Listener\Listener;
+
+$conf = [
+    'url_host' => 'https://qiitadon.com/',
+    // If the server is in "whitelist-mode" then you'll need an access token.
+    'access_token' => 'YOUR_ACCESS_TOKEN',
+];
+
+$listener = new Listener($conf);
+
+foreach($listener as $event_name => $data_payload) {
+    echo 'Event name: ' . $event_name . PHP_EOL;
+    echo 'Data: '. PHP_EOL;
+    print_r(json_decode($data_payload));
+}
+
+```
+
+```php
+<?php
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -26,18 +73,12 @@ use KEINOS\MSTDN_TOOLS\Listener\Listener;
 
 $conf = [
     'url_host' => 'https://qiitadon.com/',
-    // If the server is in "whitelist-mode" then you'll need an access token.
-    //'access_token' => 'YOUR_ACCESS_TOKEN',
+    // To listen the local time line stream set 'local'. 'public' is the default.
+    'type_stream' => 'local',
 ];
 
 $listener = new Listener($conf);
 
-/**
- * $listener ............ Iterator.
- *   $event_name ........ Event name. ("update" or "delete")
- *   $data_payload ...... Data of the event in JSON string.
- * @throws \Exception ... On any error occurred while listening.
- */
 foreach($listener as $event_name => $data_payload) {
     echo 'Event name: ' . $event_name . PHP_EOL;
     echo 'Data: '. PHP_EOL;

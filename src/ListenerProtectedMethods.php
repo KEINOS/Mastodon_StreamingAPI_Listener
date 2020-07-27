@@ -42,16 +42,18 @@ class ListenerProtectedMethods
     }
 
     /**
-     * generateRequestApiStreamingPublic
+     * generateRequestApiStreaming
      *
      * @param  Config $conf
      * @return string
      * @throws \Exception
      */
-    protected function generateRequestApiStreamingPublic(Config $conf): string
+    protected function generateRequestApiStreaming(Config $conf): string
     {
+        $endpoint = ('public' === $this->getTypeStream())
+                    ? $conf->getEndpointApiStreamingPublic()
+                    : $conf->getEndpointApiStreamingLocal();
         $method   = 'GET';
-        $endpoint = $conf->getEndpointApiStreamingPublic();
         $url_host = $conf->getUrlHost();
 
         $host = parse_url($url_host, \PHP_URL_HOST);

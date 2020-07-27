@@ -45,4 +45,24 @@ trait PropertiesTrait
     {
         return $this->mode_debug;
     }
+
+    /** @var string */
+    protected $type_stream = '';
+    /**
+     * @param  string $type_stream  Excepts only "local" or "public".
+     * @return void
+     * @throws \Exception  Other than "local" or "public".
+     */
+    public function setTypeStream(string $type_stream): void
+    {
+        if (('local' !== $type_stream) && ('public' !== $type_stream)) {
+            $msg = 'Bad stream type. Only "local" or "public" are available.' . PHP_EOL;
+            throw new \Exception($msg);
+        }
+        $this->type_stream = $type_stream;
+    }
+    public function getTypeStream(): string
+    {
+        return $this->type_stream;
+    }
 }

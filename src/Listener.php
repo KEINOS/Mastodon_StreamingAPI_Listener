@@ -26,14 +26,15 @@ class Listener extends ListenerProtectedMethods implements \Iterator, ListenerIn
 
     /** @var Config */
     protected $conf;
-    /** @var resource */
-    protected $socket;
     /** @var Parser */
     protected $parser;
+    /** @var resource */
+    protected $socket;
 
     protected const ASSOC_AS_ARRAY = true; // Associate return as array in json_decode
-    protected const TIMEOUT_REQUEST_DEFAULT = 10; // seconds
     protected const MODE_DEBUT_DEFAULT = false;
+    protected const TIMEOUT_REQUEST_DEFAULT = 10; // seconds
+    protected const TYPE_STREAM_DEFAULT = 'public';
 
     public function __construct(array $conf)
     {
@@ -45,6 +46,13 @@ class Listener extends ListenerProtectedMethods implements \Iterator, ListenerIn
             $flag_mode_debug = (false !== $conf['flag_mode_debug']);
         }
         $this->setModeAsDebug($flag_mode_debug);
+
+        // Set stream type. Defines which endpoint to use whether 'local' or 'public'.
+        $type_stream = self::TYPE_STREAM_DEFAULT;
+        if (isset($conf['type_stream'])) {
+            $type_stream = strval($conf['type_stream']);
+        }
+        $this->setTypeStream($type_stream);
 
         $this->setNameEvent('');
         $this->setDataPayload('');
@@ -93,19 +101,19 @@ class Listener extends ListenerProtectedMethods implements \Iterator, ListenerIn
         return $this->getNameEvent();
     }
 
-    public function rewind(): void
-    {
-        // Prepare request header
-        $req = $this->generateRequestApiStreamingPublic($this->conf);
-
-        // Send GET request
-        fwrite($this->socket, $req);
-    }
-
     public function next(): void
     {
         $this->setNameEvent('');
         $this->setDataPayload('');
+    }
+
+    public function rewind(): void
+    {
+        // Prepare request header
+        $req = $this->generateRequestApiStreaming($this->conf);
+
+        // Send GET request
+        fwrite($this->socket, $req);
     }
 
     public function valid(): bool
