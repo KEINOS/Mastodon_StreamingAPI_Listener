@@ -32,7 +32,7 @@ class Listener extends ListenerProtectedMethods implements \Iterator, ListenerIn
     protected $socket;
 
     protected const ASSOC_AS_ARRAY = true; // Associate return as array in json_decode
-    protected const MODE_DEBUT_DEFAULT = false;
+    protected const MODE_DEBUG_DEFAULT = false;
     protected const TIMEOUT_REQUEST_DEFAULT = 10; // seconds
     protected const TYPE_STREAM_DEFAULT = 'public';
 
@@ -41,7 +41,7 @@ class Listener extends ListenerProtectedMethods implements \Iterator, ListenerIn
         $this->treatWarningAsException();
 
         // Set debug mode. Listener class original conf.
-        $flag_mode_debug = self::MODE_DEBUT_DEFAULT;
+        $flag_mode_debug = self::MODE_DEBUG_DEFAULT;
         if (isset($conf['flag_mode_debug'])) {
             $flag_mode_debug = (false !== $conf['flag_mode_debug']);
         }
