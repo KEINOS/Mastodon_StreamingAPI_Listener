@@ -443,7 +443,7 @@ function runPHPUnit() {
     setOptionPHPUnitTestdox
     echo '- Running PHPUnit'
     # tee the result to avoid 255 status error even all tests were passed in PHP 7.1 bug.
-    ./vendor/bin/phpunit \
+    php -dxdebug.mode=coverage ./vendor/bin/phpunit \
         --configuration ./tests/conf/phpunit.xml \
         $option_testdox | (tee /dev/fd/3 | tail -3 | grep OK) 3>&1
     result_phpunit=$?

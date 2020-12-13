@@ -5,10 +5,13 @@ env:
   - PHAN_DISABLE_XDEBUG_WARN=1
 
 before_install:
+  - echo '- Before Install'
   - sudo apt-get update
   - sudo apt-get install tree
 
-install: /bin/bash ./.init/setup-composer.sh --dev
+install:
+  - echo '- Install'
+  - /bin/bash ./.init/setup-composer.sh --dev
 
 matrix:
   include:

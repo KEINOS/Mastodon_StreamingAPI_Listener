@@ -21,7 +21,7 @@ COPY ./install_composer.sh /install_composer.sh
 # Configure apt and install packages
 RUN apt-get update \
     && apt-get -y install --no-install-recommends \
-        apt-utils dialog 2>&1 \
+    apt-utils dialog 2>&1 \
     #
     # install useful tools for CLI usage
     && apt-get -y install \
@@ -36,10 +36,17 @@ RUN apt-get update \
         sudo \
         # Set Lang env for Japan
         locales \
-    && locale-gen ja_JP.UTF-8
+    && locale-gen ja_JP.UTF-8 \
+    && localedef -f UTF-8 -i ja_JP ja_JP
 
 # Install xdebug
-RUN yes | pecl install xdebug \
+RUN \
+    sudo pecl channel-update pecl.php.net; \
+    if php -r 'exit(version_compare(PHP_VERSION, "7.2.0", ">=") ? 0 : 1);'; then \
+        yes | pecl install xdebug; \
+    else \
+        yes | sudo pecl install xdebug-2.9.8; \
+    fi \
     && echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/conf.d/xdebug.ini \
     && echo "xdebug.remote_enable=on" >> /usr/local/etc/php/conf.d/xdebug.ini \
     && echo "xdebug.remote_autostart=on" >> /usr/local/etc/php/conf.d/xdebug.ini \
@@ -55,9 +62,8 @@ RUN yes | pecl install xdebug \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 
-# Install composer and Phar Archiver(Box3)
+# Install composer
 RUN sudo bash /install_composer.sh \
-    && composer global require humbug/box \
     && cp -R --force --verbose /root/.composer /home/vscode/.composer \
     && chown --recursive vscode:vscode /home/vscode/.composer
 

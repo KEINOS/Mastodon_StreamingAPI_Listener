@@ -1,5 +1,7 @@
 #!/bin/bash
 
+VERSION_COMPOSER='1.10.17'
+
 echo '========================================================================'
 echo ' Installer of PHP Composer for VSCode'
 echo '========================================================================'
@@ -16,7 +18,7 @@ then
     exit 1
 fi
 
-php composer-setup.php --quiet --install-dir=$(dirname $(which php)) --filename=composer && \
+php composer-setup.php --quiet --version="$VERSION_COMPOSER" --install-dir=$(dirname $(which php)) --filename=composer && \
 composer diagnose && \
 composer --version && \
 rm composer-setup.php && \

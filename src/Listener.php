@@ -78,7 +78,7 @@ class Listener extends ListenerProtectedMethods implements \Iterator, ListenerIn
     public function current(): string
     {
         $read  = $this->getEventAsJson($this->socket, $this->parser);
-        $event = json_decode($read, self::ASSOC_AS_ARRAY);
+        $event = (array) json_decode($read, self::ASSOC_AS_ARRAY);
 
         if (! isset($event['event'])) {
             return '';

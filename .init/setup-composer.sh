@@ -7,34 +7,34 @@
 # =============================================================================
 #  Functions
 # =============================================================================
-function echoHR(){
+function echoHR() {
     # Draw Horizontal Line
     printf '%*s\n' "${SCREEN_WIDTH}" '' | tr ' ' ${1-=}
 }
 
-function echoMsg () {
+function echoMsg() {
     echo "- ${1}"
 }
 
-function echoSubTitle () {
+function echoSubTitle() {
     echoHR '-'
     echo "■  $1"
     echoHR '-'
 }
 
-function echoTitle () {
+function echoTitle() {
     echo
     echoHR
     echo "  ${1}"
     echoHR
 }
 
-function isModeDev () {
+function isModeDev() {
     [ "${1}" = "--dev" ] && return 0 || return 1
 }
 
-function isPHP8 () {
-    php -v | grep PHP\ 8 1>/dev/null 2>/dev/null;
+function isPHP8() {
+    php -v | grep PHP\ 8 1>/dev/null 2>/dev/null
     return $?
 }
 
@@ -48,9 +48,10 @@ PATH_DIR_PARENT=$(dirname "$PATH_DIR_SCRIPT")
 cd "$PATH_DIR_PARENT"
 
 # Set width
-if [ -n "${TERM}" ];
-    then SCREEN_WIDTH=$(tput cols);
-    else SCREEN_WIDTH=80;
+if [ -n "${TERM}" ]; then
+    SCREEN_WIDTH=$(tput cols)
+else
+    SCREEN_WIDTH=80
 fi
 
 # =============================================================================
@@ -85,11 +86,20 @@ which composer 1>/dev/null
     echoMsg '💡  Composer Public Keys not fond'
     echo '- Downloding pub keys for composer ...'
     mkdir -p ~/.composer
-    wget https://composer.github.io/releases.pub -O ~/.composer/keys.tags.pub && \
-    wget https://composer.github.io/snapshots.pub -O ~/.composer/keys.dev.pub || {
+    wget https://composer.github.io/releases.pub -O ~/.composer/keys.tags.pub &&
+        wget https://composer.github.io/snapshots.pub -O ~/.composer/keys.dev.pub || {
         echoMsg '❌ ERROR: Failed to download pub keys.'
         exit 1
     }
+}
+# Fix composer version to 1.10.17 (Current latest)
+# This is needed to mantain the test package's compatibility. This might change in the future.
+VERSION_COMPOSER_STABLE='1.10.17'
+VERSION_COMPOSER_CURRENT=$(composer --version | awk '{print $3}')
+echoMsg "💡  Downgrading Composer: ${VERSION_COMPOSER_CURRENT} -> ${VERSION_COMPOSER_STABLE}"
+composer self-update "$VERSION_COMPOSER_STABLE" || {
+    echoMsg 'ERROR: Failed to downgrade composer.'
+    exit 1
 }
 echoMsg "💡  $(composer --version)"
 
@@ -106,16 +116,23 @@ echoSubTitle 'VALIDATION: composer.yml'
     exit
 }
 echoMsg '💡  composer.json found. Validating ...'
-composer validate || {
+composer validate
+[ "$?" -eq 1 ] && {
     echoMsg '❌ ERROR: Invalid composer.json format.'
     exit 1
 }
 echoMsg '✅ Valid composer format!'
 
 echoSubTitle 'Installing dependencies'
+rm -f composer.lock
+rm -rf vendor
 isModeDev $1 && {
     echoMsg '💡  Installing WITH dev packages'
-    composer install --no-interaction
+    if isPHP8; then
+        composer install --no-interaction --ignore-platform-reqs
+    else
+        composer install --no-interaction
+    fi
     result=$?
     # some version of psalm forgets to create sym-link
     ! [ -f ./vendor/bin/psalm ] && {
@@ -125,13 +142,17 @@ isModeDev $1 && {
     # check psalm.xml exists
     ! [ -f ./tests/conf/psalm.xml ] && {
         echoMsg 'Creating psalm conf file to: ./test/conf/psalm.xml'
-        ./vendor/bin/psalm --init source_dir="../../src" level=8 && \
-        mv -f ./psalm.xml ./test/conf/psalm.xml
+        ./vendor/bin/psalm --init source_dir="../../src" level=8 &&
+            mv -f ./psalm.xml ./test/conf/psalm.xml
     }
 }
 ! isModeDev $1 && {
     echoMsg '💡  Installing with NO dev packages'
-    composer install --no-dev --no-interaction
+    if isPHP8; then
+        composer install --no-dev --no-interaction --ignore-platform-reqs
+    else
+        composer install --no-dev --no-interaction
+    fi
     result=$?
 }
 
