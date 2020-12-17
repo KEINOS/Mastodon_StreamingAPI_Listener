@@ -43,7 +43,7 @@ RUN apt-get update \
 RUN \
     sudo pecl channel-update pecl.php.net; \
     if php -r 'exit(version_compare(PHP_VERSION, "7.2.0", ">=") ? 0 : 1);'; then \
-        yes | pecl install xdebug; \
+        yes | sudo pecl install xdebug; \
     else \
         yes | sudo pecl install xdebug-2.9.8; \
     fi \

@@ -22,9 +22,9 @@ $conf = [
 $hello = new Listener($conf);
 
 $option_json_encode = JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
-foreach($hello as $key => $value) {
+foreach ($hello as $key => $value) {
     echo "${key}\t" . json_encode(json_decode($value), $option_json_encode) . PHP_EOL;
-    if($key === "delete"){
+    if ($key === "delete") {
         exit();
     }
 }

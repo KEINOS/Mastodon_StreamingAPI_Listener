@@ -118,7 +118,7 @@ class Listener extends ListenerProtectedMethods implements \Iterator, ListenerIn
 
     public function valid(): bool
     {
-        if ((! feof($this->socket)) && ("resource" === gettype($this->socket))) {
+        if (is_resource($this->socket) && (! feof($this->socket)) && ("resource" === gettype($this->socket))) {
             return true;
         }
 
