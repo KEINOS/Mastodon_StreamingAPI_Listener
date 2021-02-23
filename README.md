@@ -1,4 +1,4 @@
-[![](https://travis-ci.org/KEINOS/Mastodon_StreamingAPI_Listener.svg?branch=master)](https://travis-ci.org/KEINOS/Mastodon_StreamingAPI_Listener "View Build Status on Travis")
+[![](https://travis-ci.com/KEINOS/Mastodon_StreamingAPI_Listener.svg?branch=master)](https://travis-ci.com/github/KEINOS/Mastodon_StreamingAPI_Listener "View Build Status on Travis")
 [![](https://img.shields.io/coveralls/github/KEINOS/Mastodon_StreamingAPI_Listener)](https://coveralls.io/github/KEINOS/Mastodon_StreamingAPI_Listener?branch=master "Code Coverage on COVERALLS")
 [![](https://img.shields.io/scrutinizer/quality/g/KEINOS/Mastodon_StreamingAPI_Listener/master)](https://scrutinizer-ci.com/g/KEINOS/Mastodon_StreamingAPI_Listener/?branch=master "Code quality in Scrutinizer")
 [![](https://img.shields.io/packagist/php-v/keinos/mastodon-streaming-api-parser)](https://github.com/KEINOS/Mastodon_StreamingAPI_Listener/blob/master/.travis.yml "Version Support")
